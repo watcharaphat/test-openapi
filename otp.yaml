@@ -1,0 +1,86 @@
+openapi: 3.0.3
+info:
+  version: "1"
+  title: "OTP"
+servers:
+  - url: "localhost:3000"
+paths:
+  /otp/mobile/{mobileNumber}:
+    post:
+      summary: "Request an OTP SMS to be sent to the mobile number"
+      operationId: postMobileOtp
+      tags:
+        - OTP - Mobile
+      parameters:
+        - in: path
+          name: mobileNumber
+          required: true
+          description: Mobile number which requests the OTP
+      responses:
+        "200":
+          description: "Found at least one entity matched the query params"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOtpRequest"
+
+        "400":
+          description: "Invalid mobile number"
+        "503":
+          description: "Service unavailable"
+  /otp/mobile/ref/{referenceCode}/validations:
+    post:
+      summary: "Validate the OTP"
+      operationId: validateMobileOtp
+      tags:
+        - OTP - Mobile
+      parameters:
+        - in: path
+          name: referenceCode
+          required: true
+          description: OTP reference code
+          schema:
+            type: string
+        - in: body
+          name: otp
+          required: true
+          description: OTP
+          schema:
+            $ref: "#/components/schemas/OtpValidationRequest"
+      responses:
+        "200":
+          description: "The OTP is valid"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationToken"
+        "400":
+          description: "The OTP is invalid"
+components:
+  schemas:
+    MobileOtpRequest:
+      type: object
+      properties:
+        referenceCode:
+          type: string
+      required:
+        - referenceCode
+    OtpValidationRequest:
+      type: object
+      properties:
+        otp:
+          type: string
+      required:
+        - otp
+    AuthenticationToken:
+      type: object
+      properties:
+        authenticationToken:
+          type: string
+      required:
+        - authenticationToken
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionId
